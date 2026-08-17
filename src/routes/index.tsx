@@ -7,7 +7,6 @@ import { BreadcrumbCharacter } from "@/components/BreadcrumbCharacter";
 import {
   captureWorkState,
   recallWorkState,
-  NIGHT_PORTRAIT_STATE,
   type RecallResponse,
   type WorkState,
 } from "@/lib/recall-api";
@@ -85,10 +84,13 @@ function WorkStateBody({
 }) {
   return (
     <div className="space-y-5">
-      <Field label="Intent" delay={base}>
-        {state.intent}
-      </Field>
+      {state.intent && (
+        <Field label="Intent" delay={base}>
+          {state.intent}
+        </Field>
+      )}
 
+      {state.explored.length > 0 && (
       <Field label="Explored" delay={base + 220}>
         <div className="flex flex-wrap gap-2">
           {state.explored.map((e) => (
@@ -101,32 +103,40 @@ function WorkStateBody({
           ))}
         </div>
       </Field>
+      )}
 
+      {state.rejected.length > 0 && (
       <Field label="Rejected" delay={base + 440}>
         <ul className="space-y-1.5">
           {state.rejected.map((r) => (
-            <li key={r.label} className="flex gap-2">
+            <li key={r} className="flex gap-2">
               <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/60" />
               <span className="text-muted-foreground line-through decoration-muted-foreground/40">
-                {r.label}
+                {r}
               </span>
-              <span className="text-muted-foreground">— {r.reason}</span>
             </li>
           ))}
         </ul>
       </Field>
+      )}
 
-      <Field label="Current direction" delay={base + 660}>
-        <span className="font-display text-[17px] font-semibold text-moss">
-          {state.currentDirection}
-        </span>
-      </Field>
+      {state.currentDirection && (
+        <Field label="Current direction" delay={base + 660}>
+          <span className="font-display text-[17px] font-semibold text-moss">
+            {state.currentDirection}
+          </span>
+        </Field>
+      )}
 
-      <OpenQuestion delay={base + 880} text={state.openQuestion} />
+      {state.openQuestion && (
+        <OpenQuestion delay={base + 880} text={state.openQuestion} />
+      )}
 
-      <Field label="Next experiment" delay={base + 1100}>
-        {state.nextExperiment}
-      </Field>
+      {state.nextExperiment && (
+        <Field label="Next experiment" delay={base + 1100}>
+          {state.nextExperiment}
+        </Field>
+      )}
     </div>
   );
 }
@@ -164,7 +174,10 @@ function Index() {
   const [session, setSession] = useState(1);
   const [saving, setSaving] = useState(false);
   const [recalling, setRecalling] = useState(false);
+  const [captured, setCaptured] = useState<WorkState | null>(null);
   const [recall, setRecall] = useState<RecallResponse | null>(null);
+  const [captureError, setCaptureError] = useState<string | null>(null);
+  const [recallError, setRecallError] = useState<string | null>(null);
   const [whyOpen, setWhyOpen] = useState(false);
   const [pop, setPop] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -181,11 +194,18 @@ function Index() {
 
   const onRemember = async () => {
     setSaving(true);
-    await captureWorkState(NIGHT_PORTRAIT_STATE);
-    setSaving(false);
-    setPop(true);
-    setTimeout(() => setPop(false), 700);
-    setPhase("saved");
+    setCaptureError(null);
+    try {
+      const res = await captureWorkState();
+      setCaptured(res.workState);
+      setPop(true);
+      setTimeout(() => setPop(false), 700);
+      setPhase("saved");
+    } catch (e) {
+      setCaptureError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const onNewSession = () => {
@@ -200,12 +220,18 @@ function Index() {
 
   const onRecall = async () => {
     setRecalling(true);
-    const res = await recallWorkState("Night Portrait");
-    setRecall(res);
-    setRecalling(false);
-    setPop(true);
-    setTimeout(() => setPop(false), 700);
-    setPhase("recalled");
+    setRecallError(null);
+    try {
+      const res = await recallWorkState();
+      setRecall(res);
+      setPop(true);
+      setTimeout(() => setPop(false), 700);
+      setPhase("recalled");
+    } catch (e) {
+      setRecallError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setRecalling(false);
+    }
   };
 
   const companionVisible = phase !== "working" && phase !== "transition";
@@ -282,12 +308,21 @@ function Index() {
                 Welcome back. I remember where you left off.
               </span>
             </Bubble>
+            {recallError && (
+              <Bubble>
+                <span className="text-[14px] text-clay">{recallError}</span>
+              </Bubble>
+            )}
             <button
               onClick={onRecall}
               disabled={recalling}
               className="rounded-full bg-primary px-5 py-2.5 text-[14px] font-semibold text-primary-foreground shadow-soft transition-transform duration-200 hover:scale-[1.03] disabled:opacity-70"
             >
-              {recalling ? "Retrieving…" : "Show me"}
+              {recalling
+                ? "Retrieving…"
+                : recallError
+                  ? "Try again"
+                  : "Show me"}
             </button>
           </div>
         )}
@@ -296,22 +331,36 @@ function Index() {
           <div className="pointer-events-auto">
             <Panel>
               <p className="text-[15px] leading-snug text-muted-foreground">
-                I noticed you stopped working on this piece. Here's where you
-                were.
+                {captured
+                  ? "I noticed you stopped working on this piece. Here's where you were."
+                  : "I noticed you stopped working on this piece. Want me to remember where you are?"}
               </p>
-              <div className="mt-5">
-                <WorkStateBody state={NIGHT_PORTRAIT_STATE} />
-              </div>
+              {captured && (
+                <div className="mt-5">
+                  <WorkStateBody state={captured} />
+                </div>
+              )}
 
               <div className="mt-6 border-t border-border pt-5">
                 {phase === "capture" ? (
-                  <button
-                    onClick={onRemember}
-                    disabled={saving}
-                    className="w-full rounded-full bg-primary py-3 text-[15px] font-semibold text-primary-foreground shadow-soft transition-transform duration-200 hover:scale-[1.02] disabled:opacity-70"
-                  >
-                    {saving ? "Saving your work state…" : "Remember this"}
-                  </button>
+                  <div className="space-y-3">
+                    <button
+                      onClick={onRemember}
+                      disabled={saving}
+                      className="w-full rounded-full bg-primary py-3 text-[15px] font-semibold text-primary-foreground shadow-soft transition-transform duration-200 hover:scale-[1.02] disabled:opacity-70"
+                    >
+                      {saving
+                        ? "Remembering where you left off…"
+                        : captureError
+                          ? "Try again"
+                          : "Remember this"}
+                    </button>
+                    {captureError && (
+                      <p className="text-center text-[13px] text-clay">
+                        {captureError}
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <div className="reveal-up space-y-3 text-center">
                     <p className="text-[15px] text-moss">
@@ -364,16 +413,18 @@ function Index() {
                   <ul className="reveal-up mt-3 space-y-3">
                     {recall.retrievedMemories.map((m) => (
                       <li
-                        key={m.title}
+                        key={m.memoryId}
                         className="rounded-2xl bg-secondary/70 px-4 py-3"
                       >
                         <div className="flex items-baseline justify-between gap-3">
                           <span className="text-[13.5px] font-semibold text-foreground">
-                            {m.title} — {m.date}
+                            Memory {m.memoryId.slice(0, 8)}
                           </span>
-                          <span className="text-[12px] text-muted-foreground">
-                            Similarity {m.similarity.toFixed(2)}
-                          </span>
+                          {m.similarity !== null && (
+                            <span className="text-[12px] text-muted-foreground">
+                              Similarity {m.similarity.toFixed(2)}
+                            </span>
+                          )}
                         </div>
                         <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                           Recovered
