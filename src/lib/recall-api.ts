@@ -37,7 +37,8 @@ export type RecallResponse = {
   memoryStore: string;
 };
 
-const USE_MOCK = true;
+const BACKEND_URL = "https://gvzzvmmdaqzhynsm5dwy45iqxi0glflr";
+const USE_MOCK = false;
 
 export const NIGHT_PORTRAIT_STATE: WorkState = {
   project: "Night Portrait",
