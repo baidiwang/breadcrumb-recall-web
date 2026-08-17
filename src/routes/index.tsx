@@ -296,12 +296,21 @@ function Index() {
                 Welcome back. I remember where you left off.
               </span>
             </Bubble>
+            {recallError && (
+              <Bubble>
+                <span className="text-[14px] text-clay">{recallError}</span>
+              </Bubble>
+            )}
             <button
               onClick={onRecall}
               disabled={recalling}
               className="rounded-full bg-primary px-5 py-2.5 text-[14px] font-semibold text-primary-foreground shadow-soft transition-transform duration-200 hover:scale-[1.03] disabled:opacity-70"
             >
-              {recalling ? "Retrieving…" : "Show me"}
+              {recalling
+                ? "Retrieving…"
+                : recallError
+                  ? "Try again"
+                  : "Show me"}
             </button>
           </div>
         )}
