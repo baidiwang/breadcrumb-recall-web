@@ -310,22 +310,36 @@ function Index() {
           <div className="pointer-events-auto">
             <Panel>
               <p className="text-[15px] leading-snug text-muted-foreground">
-                I noticed you stopped working on this piece. Here's where you
-                were.
+                {captured
+                  ? "I noticed you stopped working on this piece. Here's where you were."
+                  : "I noticed you stopped working on this piece. Want me to remember where you are?"}
               </p>
-              <div className="mt-5">
-                <WorkStateBody state={NIGHT_PORTRAIT_STATE} />
-              </div>
+              {captured && (
+                <div className="mt-5">
+                  <WorkStateBody state={captured} />
+                </div>
+              )}
 
               <div className="mt-6 border-t border-border pt-5">
                 {phase === "capture" ? (
-                  <button
-                    onClick={onRemember}
-                    disabled={saving}
-                    className="w-full rounded-full bg-primary py-3 text-[15px] font-semibold text-primary-foreground shadow-soft transition-transform duration-200 hover:scale-[1.02] disabled:opacity-70"
-                  >
-                    {saving ? "Saving your work state…" : "Remember this"}
-                  </button>
+                  <div className="space-y-3">
+                    <button
+                      onClick={onRemember}
+                      disabled={saving}
+                      className="w-full rounded-full bg-primary py-3 text-[15px] font-semibold text-primary-foreground shadow-soft transition-transform duration-200 hover:scale-[1.02] disabled:opacity-70"
+                    >
+                      {saving
+                        ? "Remembering where you left off…"
+                        : captureError
+                          ? "Try again"
+                          : "Remember this"}
+                    </button>
+                    {captureError && (
+                      <p className="text-center text-[13px] text-clay">
+                        {captureError}
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <div className="reveal-up space-y-3 text-center">
                     <p className="text-[15px] text-moss">
