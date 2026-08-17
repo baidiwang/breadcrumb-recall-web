@@ -7,7 +7,6 @@ import { BreadcrumbCharacter } from "@/components/BreadcrumbCharacter";
 import {
   captureWorkState,
   recallWorkState,
-  NIGHT_PORTRAIT_STATE,
   type RecallResponse,
   type WorkState,
 } from "@/lib/recall-api";
@@ -105,12 +104,11 @@ function WorkStateBody({
       <Field label="Rejected" delay={base + 440}>
         <ul className="space-y-1.5">
           {state.rejected.map((r) => (
-            <li key={r.label} className="flex gap-2">
+            <li key={r} className="flex gap-2">
               <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/60" />
               <span className="text-muted-foreground line-through decoration-muted-foreground/40">
-                {r.label}
+                {r}
               </span>
-              <span className="text-muted-foreground">— {r.reason}</span>
             </li>
           ))}
         </ul>
@@ -364,16 +362,18 @@ function Index() {
                   <ul className="reveal-up mt-3 space-y-3">
                     {recall.retrievedMemories.map((m) => (
                       <li
-                        key={m.title}
+                        key={m.memoryId}
                         className="rounded-2xl bg-secondary/70 px-4 py-3"
                       >
                         <div className="flex items-baseline justify-between gap-3">
                           <span className="text-[13.5px] font-semibold text-foreground">
-                            {m.title} — {m.date}
+                            Memory {m.memoryId.slice(0, 8)}
                           </span>
-                          <span className="text-[12px] text-muted-foreground">
-                            Similarity {m.similarity.toFixed(2)}
-                          </span>
+                          {m.similarity !== null && (
+                            <span className="text-[12px] text-muted-foreground">
+                              Similarity {m.similarity.toFixed(2)}
+                            </span>
+                          )}
                         </div>
                         <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                           Recovered
