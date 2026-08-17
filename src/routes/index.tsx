@@ -84,10 +84,13 @@ function WorkStateBody({
 }) {
   return (
     <div className="space-y-5">
-      <Field label="Intent" delay={base}>
-        {state.intent}
-      </Field>
+      {state.intent && (
+        <Field label="Intent" delay={base}>
+          {state.intent}
+        </Field>
+      )}
 
+      {state.explored.length > 0 && (
       <Field label="Explored" delay={base + 220}>
         <div className="flex flex-wrap gap-2">
           {state.explored.map((e) => (
@@ -100,7 +103,9 @@ function WorkStateBody({
           ))}
         </div>
       </Field>
+      )}
 
+      {state.rejected.length > 0 && (
       <Field label="Rejected" delay={base + 440}>
         <ul className="space-y-1.5">
           {state.rejected.map((r) => (
@@ -113,18 +118,25 @@ function WorkStateBody({
           ))}
         </ul>
       </Field>
+      )}
 
-      <Field label="Current direction" delay={base + 660}>
-        <span className="font-display text-[17px] font-semibold text-moss">
-          {state.currentDirection}
-        </span>
-      </Field>
+      {state.currentDirection && (
+        <Field label="Current direction" delay={base + 660}>
+          <span className="font-display text-[17px] font-semibold text-moss">
+            {state.currentDirection}
+          </span>
+        </Field>
+      )}
 
-      <OpenQuestion delay={base + 880} text={state.openQuestion} />
+      {state.openQuestion && (
+        <OpenQuestion delay={base + 880} text={state.openQuestion} />
+      )}
 
-      <Field label="Next experiment" delay={base + 1100}>
-        {state.nextExperiment}
-      </Field>
+      {state.nextExperiment && (
+        <Field label="Next experiment" delay={base + 1100}>
+          {state.nextExperiment}
+        </Field>
+      )}
     </div>
   );
 }
