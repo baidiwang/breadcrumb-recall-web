@@ -162,7 +162,10 @@ function Index() {
   const [session, setSession] = useState(1);
   const [saving, setSaving] = useState(false);
   const [recalling, setRecalling] = useState(false);
+  const [captured, setCaptured] = useState<WorkState | null>(null);
   const [recall, setRecall] = useState<RecallResponse | null>(null);
+  const [captureError, setCaptureError] = useState<string | null>(null);
+  const [recallError, setRecallError] = useState<string | null>(null);
   const [whyOpen, setWhyOpen] = useState(false);
   const [pop, setPop] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -179,11 +182,18 @@ function Index() {
 
   const onRemember = async () => {
     setSaving(true);
-    await captureWorkState(NIGHT_PORTRAIT_STATE);
-    setSaving(false);
-    setPop(true);
-    setTimeout(() => setPop(false), 700);
-    setPhase("saved");
+    setCaptureError(null);
+    try {
+      const res = await captureWorkState();
+      setCaptured(res.workState);
+      setPop(true);
+      setTimeout(() => setPop(false), 700);
+      setPhase("saved");
+    } catch (e) {
+      setCaptureError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const onNewSession = () => {
@@ -198,12 +208,18 @@ function Index() {
 
   const onRecall = async () => {
     setRecalling(true);
-    const res = await recallWorkState("Night Portrait");
-    setRecall(res);
-    setRecalling(false);
-    setPop(true);
-    setTimeout(() => setPop(false), 700);
-    setPhase("recalled");
+    setRecallError(null);
+    try {
+      const res = await recallWorkState();
+      setRecall(res);
+      setPop(true);
+      setTimeout(() => setPop(false), 700);
+      setPhase("recalled");
+    } catch (e) {
+      setRecallError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setRecalling(false);
+    }
   };
 
   const companionVisible = phase !== "working" && phase !== "transition";
