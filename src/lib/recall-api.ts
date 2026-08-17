@@ -1,25 +1,23 @@
 /**
- * Integration points for the Breadcrumb Recall backend.
+ * Breadcrumb Recall — production backend integration.
  *
- * Real endpoints (swap MOCK to false once available):
- *   POST /api/capture -> { workState, memoryId, saved }
- *   POST /api/recall  -> { recall, currentContext, retrievedMemories, reconstructedWorkState }
+ *   GET  /api/health
+ *   POST /api/capture  { projectId, context } -> { saved, memoryId, workState }
+ *   POST /api/recall   { projectId, context } -> { recall, retrievedMemories, reconstructedWorkState }
  */
 
 export type WorkState = {
-  project: string;
   intent: string;
   explored: string[];
-  rejected: { label: string; reason: string }[];
+  rejected: string[];
   currentDirection: string;
   openQuestion: string;
   nextExperiment: string;
 };
 
 export type RetrievedMemory = {
-  title: string;
-  date: string;
-  similarity: number;
+  memoryId: string;
+  similarity: number | null;
   recovered: string[];
 };
 
@@ -31,90 +29,113 @@ export type CaptureResponse = {
 
 export type RecallResponse = {
   recall: string;
-  currentContext: string;
   retrievedMemories: RetrievedMemory[];
   reconstructedWorkState: WorkState;
   memoryStore: string;
 };
 
-const BACKEND_URL = "https://gvzzvmmdaqzhynsm5dwy45iqxi0glflr";
-const USE_MOCK = false;
+const BACKEND_URL =
+  "https://gvzzvmmdaqzhynsm5dwy45iqxi0glflr.lambda-url.us-east-1.on.aws";
 
-export const NIGHT_PORTRAIT_STATE: WorkState = {
-  project: "Night Portrait",
-  intent: "Create a warm character against a cool nighttime environment.",
-  explored: ["Warm yellow", "Deep blue", "Muted blue-violet"],
-  rejected: [
-    { label: "Warm yellow", reason: "Competed with the subject." },
-    { label: "Deep blue", reason: "Made the skin tones feel muddy." },
-  ],
-  currentDirection: "Muted blue-violet.",
-  openQuestion:
-    "How can the environment remain cool without making the skin feel muddy?",
-  nextExperiment:
-    "Reduce background saturation while preserving warm highlights.",
+export const PROJECT_ID = "night-portrait";
+export const MEMORY_STORE = "CockroachDB";
+
+/** Full session-1 context the artist was working in (sent on capture). */
+export const CAPTURE_CONTEXT =
+  "Night Portrait palette study. I want the character to feel warm and inviting against a cool nighttime environment. " +
+  "I tried a warm yellow background but it competed with the subject. I tried a deep blue background but it made the skin tones feel muddy. " +
+  "Right now I am leaning toward a muted blue-violet. I still cannot decide how to keep the environment cool without making the skin feel muddy. " +
+  "Next I want to reduce background saturation while preserving warm highlights.";
+
+/** Session-2 partial context only — no history, no rejected directions. */
+export const RECALL_CONTEXT =
+  "Night portrait study. Keep the environment cool without losing warm skin tones.";
+
+type RawWorkState = {
+  intent?: string;
+  explored_directions?: string[];
+  rejected_directions?: string[];
+  current_direction?: string;
+  unresolved_question?: string;
+  next_experiment?: string;
 };
 
-const MOCK_MEMORIES: RetrievedMemory[] = [
-  {
-    title: "Night Portrait",
-    date: "Aug 16",
-    similarity: 0.89,
-    recovered: [
-      "deep blue was rejected",
-      "muted blue-violet became the current direction",
-      "unresolved palette decision",
-    ],
-  },
-  {
-    title: "Palette test — cool backdrops",
-    date: "Aug 14",
-    similarity: 0.74,
-    recovered: ["cool backdrop dulled warm skin", "kept highlights untouched"],
-  },
-  {
-    title: "Evening light study",
-    date: "Aug 09",
-    similarity: 0.68,
-    recovered: ["warm rim light reads best at low saturation"],
-  },
-];
-
-const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-export async function captureWorkState(
-  workState: WorkState,
-): Promise<CaptureResponse> {
-  if (USE_MOCK) {
-    await delay(700);
-    return { workState, memoryId: "mem_night_portrait_0816", saved: true };
-  }
-  const res = await fetch(`${BACKEND_URL}/api/capture`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ workState }),
-  });
-  if (!res.ok) throw new Error(`Capture failed: ${res.status}`);
-  return (await res.json()) as CaptureResponse;
+function normalizeWorkState(raw: RawWorkState | undefined | null): WorkState {
+  return {
+    intent: raw?.intent ?? "",
+    explored: raw?.explored_directions ?? [],
+    rejected: raw?.rejected_directions ?? [],
+    currentDirection: raw?.current_direction ?? "",
+    openQuestion: raw?.unresolved_question ?? "",
+    nextExperiment: raw?.next_experiment ?? "",
+  };
 }
 
-export async function recallWorkState(query: string): Promise<RecallResponse> {
-  if (USE_MOCK) {
-    await delay(900);
-    return {
-      recall: "Welcome back. I remember where you left off.",
-      currentContext:
-        "Night portrait study. Keep the environment cool without losing warm skin tones.",
-      retrievedMemories: MOCK_MEMORIES,
-      reconstructedWorkState: NIGHT_PORTRAIT_STATE,
-      memoryStore: "CockroachDB",
-    };
+async function post<T>(path: string, body: unknown): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new Error("Couldn't reach Breadcrumb's memory. Check your connection.");
   }
-  const res = await fetch(`${BACKEND_URL}/api/recall`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query }),
-  });
-  if (!res.ok) throw new Error(`Recall failed: ${res.status}`);
-  return (await res.json()) as RecallResponse;
+  const json = (await res.json().catch(() => null)) as
+    | (T & { error?: string })
+    | null;
+  if (!res.ok || !json || json.error) {
+    throw new Error(json?.error ?? `Request failed (${res.status}).`);
+  }
+  return json;
+}
+
+export async function captureWorkState(): Promise<CaptureResponse> {
+  const data = await post<{
+    saved?: boolean;
+    memoryId?: string;
+    workState?: RawWorkState;
+  }>("/api/capture", { projectId: PROJECT_ID, context: CAPTURE_CONTEXT });
+
+  return {
+    saved: data.saved ?? true,
+    memoryId: data.memoryId ?? "",
+    workState: normalizeWorkState(data.workState),
+  };
+}
+
+export async function recallWorkState(): Promise<RecallResponse> {
+  const data = await post<{
+    recall?: string;
+    reconstructedWorkState?: RawWorkState;
+    retrievedMemories?: {
+      memoryId?: string;
+      distance?: number;
+      workState?: RawWorkState;
+    }[];
+  }>("/api/recall", { projectId: PROJECT_ID, context: RECALL_CONTEXT });
+
+  const retrievedMemories: RetrievedMemory[] = (data.retrievedMemories ?? []).map(
+    (m, i) => {
+      const ws = normalizeWorkState(m.workState);
+      const recovered = [
+        ...ws.rejected.map((r) => `rejected — ${r}`),
+        ws.currentDirection ? `direction — ${ws.currentDirection}` : "",
+        ws.openQuestion ? `open question — ${ws.openQuestion}` : "",
+      ].filter(Boolean);
+      return {
+        memoryId: m.memoryId ?? `memory-${i}`,
+        similarity: typeof m.distance === "number" ? 1 - m.distance : null,
+        recovered,
+      };
+    },
+  );
+
+  return {
+    recall: data.recall ?? "",
+    reconstructedWorkState: normalizeWorkState(data.reconstructedWorkState),
+    retrievedMemories,
+    memoryStore: MEMORY_STORE,
+  };
 }
