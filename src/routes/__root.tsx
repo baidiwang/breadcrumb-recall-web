@@ -77,21 +77,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Breadcrumb Recall" },
+      { title: "Breadcrumb Recall — Remember where you left off" },
       {
         name: "description",
         content:
-          "Breadcrumb remembers where you left off — and what you were still trying to figure out.",
+          "A quiet creative workspace where Breadcrumb remembers the decision you were still trying to make. Night Portrait study demo.",
       },
       { name: "author", content: "Breadcrumb" },
-      { property: "og:title", content: "Breadcrumb Recall" },
+      { property: "og:title", content: "Breadcrumb Recall — Remember where you left off" },
       {
         property: "og:description",
         content:
-          "Breadcrumb remembers where you left off — and what you were still trying to figure out.",
+          "A quiet creative workspace where Breadcrumb remembers the decision you were still trying to make. Night Portrait study demo.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Breadcrumb Recall — Remember where you left off" },
+      { name: "twitter:description", content: "A quiet creative workspace where Breadcrumb remembers the decision you were still trying to make. Night Portrait study demo." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/615e0a1e86438f79919a5de4f703af34/id-preview-58a7b759--53fb1486-9453-49f5-ae3b-f6a8163d7000.lovable.app-1786937740068.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/615e0a1e86438f79919a5de4f703af34/id-preview-58a7b759--53fb1486-9453-49f5-ae3b-f6a8163d7000.lovable.app-1786937740068.png" },
     ],
     links: [
       {

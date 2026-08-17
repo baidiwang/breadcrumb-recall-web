@@ -28,7 +28,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Breadcrumb doesn't just remember what happened. It remembers what you were still trying to figure out.",
+          "A quiet creative workspace where Breadcrumb remembers the decision you were still trying to make. Night Portrait study demo.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
