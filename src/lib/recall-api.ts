@@ -89,11 +89,12 @@ export async function captureWorkState(
     await delay(700);
     return { workState, memoryId: "mem_night_portrait_0816", saved: true };
   }
-  const res = await fetch("/api/capture", {
+  const res = await fetch(`${BACKEND_URL}/api/capture`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ workState }),
   });
+  if (!res.ok) throw new Error(`Capture failed: ${res.status}`);
   return (await res.json()) as CaptureResponse;
 }
 
@@ -109,10 +110,11 @@ export async function recallWorkState(query: string): Promise<RecallResponse> {
       memoryStore: "CockroachDB",
     };
   }
-  const res = await fetch("/api/recall", {
+  const res = await fetch(`${BACKEND_URL}/api/recall`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query }),
   });
+  if (!res.ok) throw new Error(`Recall failed: ${res.status}`);
   return (await res.json()) as RecallResponse;
 }
