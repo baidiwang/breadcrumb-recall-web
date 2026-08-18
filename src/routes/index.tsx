@@ -166,7 +166,9 @@ type Phase =
   | "returned"
   | "welcome"
   | "recalled"
-  | "resumed";
+  | "resumed"
+  | "resume-dismissing"
+  | "resume-idle";
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("working");
@@ -233,6 +235,12 @@ function Index() {
     }
   };
 
+  const onResume = () => {
+    setPhase("resumed");
+    later(() => setPhase("resume-dismissing"), 1700);
+    later(() => setPhase("resume-idle"), 2100);
+  };
+
   const companionVisible = phase !== "working" && phase !== "transition";
   const showPanel = phase === "capture" || phase === "saved";
   const showRecallPanel = phase === "recalled" && recall;
@@ -291,8 +299,12 @@ function Index() {
           </div>
         )}
 
-        {phase === "resumed" && (
-          <div className="pointer-events-auto">
+        {(phase === "resumed" || phase === "resume-dismissing") && (
+          <div
+            className={`pointer-events-auto transition-opacity duration-300 ${
+              phase === "resume-dismissing" ? "opacity-0" : "opacity-100"
+            }`}
+          >
             <Bubble>
               <span className="text-moss">Picking up right where you left off.</span>
             </Bubble>
@@ -396,7 +408,7 @@ function Index() {
 
               <div className="reveal-up mt-6" style={{ animationDelay: "820ms" }}>
                 <button
-                  onClick={() => setPhase("resumed")}
+                  onClick={onResume}
                   className="w-full rounded-full bg-primary py-3 text-[15px] font-semibold text-primary-foreground shadow-soft transition-transform duration-200 hover:scale-[1.02]"
                 >
                   Resume
