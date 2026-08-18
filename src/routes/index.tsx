@@ -420,9 +420,9 @@ function Index() {
                           <span className="text-[13.5px] font-semibold text-foreground">
                             Memory {m.memoryId.slice(0, 8)}
                           </span>
-                          {m.similarity !== null && (
+                          {m.distance !== null && (
                             <span className="text-[12px] text-muted-foreground">
-                              Similarity {m.similarity.toFixed(2)}
+                              Distance {m.distance.toFixed(2)}
                             </span>
                           )}
                         </div>
