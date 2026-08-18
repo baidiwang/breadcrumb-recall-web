@@ -229,8 +229,8 @@ function Index() {
       setSession(2);
       setPhase("returned");
       window.scrollTo({ top: 0 });
-    }, 2600);
-    later(() => setPhase("welcome"), 4600);
+    }, 1700);
+    later(() => setPhase("welcome"), 2900);
   };
 
   const onRecall = async () => {
