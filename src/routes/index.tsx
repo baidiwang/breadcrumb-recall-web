@@ -350,8 +350,8 @@ function Index() {
             <Panel>
               <p className="text-[15px] leading-snug text-muted-foreground">
                 {captured
-                  ? "I noticed you stopped working on this piece. Here's where you were."
-                  : "I noticed you stopped working on this piece. Want me to remember where you are?"}
+                  ? "I noticed you stopped working here. Here's where you were."
+                  : "I noticed you stopped working here. Want me to remember where you are?"}
               </p>
               {captured && (
                 <div className="mt-5">
