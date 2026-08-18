@@ -1,27 +1,125 @@
-# My Breadcrumb Companion
+# Breadcrumb: Continuity for Unfinished Work 🍞
 
-hi我现在在做之前一个项目的衍生产品 你可以先看一下我们这个对话框: Breadcrumb
-记住以下里面的设计内容
+Web frontend for **Breadcrumb**, an AI companion that helps you remember where you left off in unfinished work.
 
-This project was built with [Lovable](https://lovable.dev).
+Instead of preserving only activity history, Breadcrumb captures a structured **Work State** — including what you were trying to achieve, what you explored and rejected, your current direction, the question that remained unresolved, and what you planned to try next.
 
-**Live app**: https://breadcrumb-recall.lovable.app
+When you return later with only partial context, Breadcrumb retrieves persistent Work-State Memory and reconstructs where to continue.
 
-## Build with Lovable
+> **History tells you what happened. Breadcrumb tells you what to continue.**
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/53fb1486-9453-49f5-ae3b-f6a8163d7000).
+## Live Demo
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+**https://breadcrumb-recall.vercel.app**
+
+The demo uses a representative **Mobile Checkout Redesign** workflow.
+
+Try the complete flow:
+
+1. Wait for Breadcrumb to notice the simulated interruption.
+2. Click **Remember this**.
+3. Review the extracted Work State.
+4. Click **Leave & come back later**.
+5. After the **2 days later…** transition, click **Show me**.
+6. Breadcrumb retrieves the previous Work State using only partial current context.
+7. Expand **Why this recall?** to inspect the real memories used during retrieval.
+
+No credentials are required.
+
+## Architecture
+
+This repository contains the **web demo frontend**.
+
+The core Agentic Memory implementation lives in the main repository:
+
+**https://github.com/baidiwang/breadcrumb-recall**
+
+Production architecture:
+
+```text
+Vercel Web Frontend
+        ↓
+AWS Lambda Function URL
+        ↓
+Breadcrumb Recall Agent
+   ├── Anthropic Claude
+   ├── MiniLM embeddings
+   └── CockroachDB
+        ├── Persistent Work-State Memory
+        └── Distributed Vector Retrieval
+```
+
+The frontend calls the production AWS Lambda backend directly over HTTPS.
+
+There are no API keys, database credentials, or other backend secrets in this repository.
+
+## Demo Scope
+
+The Mobile Checkout workspace is a deterministic, representative product-design scenario created for the hackathon demo.
+
+It is **not a Figma integration**.
+
+The scenario is pre-seeded, but the memory pipeline is real:
+
+```text
+Work Context
+→ Work-State Extraction
+→ Semantic Embedding
+→ CockroachDB Persistence
+→ Vector Retrieval
+→ Recall Reconstruction
+```
+
+The returning session intentionally contains only partial context. Previous design decisions and rejection reasons shown during Recall are retrieved from persistent memory rather than included in the returning prompt.
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Requirements:
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+- Node.js
+- npm
+
+Clone and install:
+
+```bash
+git clone https://github.com/baidiwang/breadcrumb-recall-web.git
+cd breadcrumb-recall-web
+npm install
+```
+
+Start the local development server:
+
+```bash
 npm run dev
 ```
+
+For additional available scripts, see `package.json`.
+
+## Tech Stack
+
+- React
+- TypeScript
+- Vite
+- TanStack Start
+- Vercel
+- AWS Lambda production API
+
+The interface was initially prototyped with Lovable and then integrated with the production Breadcrumb Recall backend.
+
+## Related Links
+
+**Core Agent / Backend**
+
+https://github.com/baidiwang/breadcrumb-recall
+
+**Production Demo**
+
+https://breadcrumb-recall.vercel.app
+
+## Hackathon
+
+Built for the **CockroachDB × AWS Hackathon: Build with Agentic Memory**.
+
+The core submission demonstrates persistent Work-State Memory using CockroachDB Distributed Vector Indexing and CockroachDB Cloud Managed MCP Server, with the production agent backend running on AWS Lambda.
+
+See the [main repository](https://github.com/baidiwang/breadcrumb-recall) for full architecture, setup instructions, CockroachDB configuration, MCP usage, API documentation, testing, and project lineage.
