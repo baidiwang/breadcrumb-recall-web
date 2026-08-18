@@ -304,9 +304,20 @@ function Index() {
       <div className="pointer-events-none fixed bottom-6 right-6 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end gap-3">
         {phase === "noticed" && (
           <div className="pointer-events-auto">
-            <Bubble>I noticed you stopped working on this piece.</Bubble>
+            <Bubble>I noticed you stopped working here.</Bubble>
           </div>
         )}
+
+        {phase === "resumed" && (
+          <div className="pointer-events-auto">
+            <Bubble>
+              <span className="text-moss">
+                Picking up right where you left off.
+              </span>
+            </Bubble>
+          </div>
+        )}
+
 
         {phase === "welcome" && (
           <div className="pointer-events-auto flex flex-col items-end gap-3">
