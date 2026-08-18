@@ -160,6 +160,18 @@ function Panel({ children }: { children: React.ReactNode }) {
 
 /* ---------- page ---------- */
 
+/** One concise sentence built from the real recalled work state. */
+function whereYouLeftOff(res: RecallResponse): string {
+  const ws = res.reconstructedWorkState;
+  if (!ws.currentDirection) return "";
+  const ruled = ws.rejected.slice(0, 2);
+  const list =
+    ruled.length === 2 ? `${ruled[0]} and ${ruled[1]}` : (ruled[0] ?? "");
+  return list
+    ? `You were testing ${ws.currentDirection} after ruling out ${list}.`
+    : `You were testing ${ws.currentDirection}.`;
+}
+
 type Phase =
   | "working"
   | "noticed"
@@ -168,7 +180,9 @@ type Phase =
   | "transition"
   | "returned"
   | "welcome"
-  | "recalled";
+  | "recalled"
+  | "resumed";
+
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("working");
