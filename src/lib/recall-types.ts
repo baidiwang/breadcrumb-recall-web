@@ -9,7 +9,7 @@ export type WorkState = {
 
 export type RetrievedMemory = {
   memoryId: string;
-  similarity: number | null;
+  distance: number | null;
   recovered: string[];
 };
 
