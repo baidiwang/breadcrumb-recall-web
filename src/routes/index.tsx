@@ -257,30 +257,22 @@ function Index() {
       <main className="mx-auto max-w-5xl px-8 pb-40 pt-14">
         <div className="max-w-xl">
           <h1 className="font-display text-[44px] font-bold leading-tight tracking-tight text-foreground">
-            Night Portrait
+            Mobile Checkout Redesign
           </h1>
           <p className="mt-3 text-[16px] leading-relaxed text-muted-foreground">
             {session === 1
-              ? "Palette study · last edited 14 minutes ago"
-              : "Night portrait study. Keep the environment cool without losing warm skin tones."}
+              ? "Checkout header · last edited 14 minutes ago"
+              : "Continue simplifying the mobile checkout header while keeping progress clear."}
           </p>
         </div>
 
         <div className="mt-10 flex justify-center">
-          <figure className="w-full max-w-[520px] rounded-[32px] bg-card p-3 shadow-soft">
-            <img
-              src={artwork}
-              alt="Night Portrait study: a warmly lit face against a cool blue-violet night city"
-              width={1280}
-              height={1600}
-              className="w-full rounded-[24px] object-cover"
-            />
-            <figcaption className="px-2 pb-1 pt-3 text-[13px] text-muted-foreground">
-              night-portrait_v7.psd
-            </figcaption>
-          </figure>
+          <div className="w-full max-w-[720px]">
+            <CheckoutCanvas />
+          </div>
         </div>
       </main>
+
 
       {/* time-passing transition */}
       {phase === "transition" && (
