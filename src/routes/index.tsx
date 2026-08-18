@@ -375,17 +375,46 @@ function Index() {
         {showRecallPanel && (
           <div className="pointer-events-auto">
             <Panel>
-              <p className="font-display text-[17px] font-semibold leading-snug text-moss">
-                {recall.recall}
+              <p className="font-display text-[19px] font-semibold leading-snug text-moss">
+                Welcome back.
               </p>
-              <div className="mt-5">
-                <WorkStateBody state={recall.reconstructedWorkState} base={80} />
+
+              <div className="mt-5 space-y-5">
+                <Field label="Where you left off" delay={80}>
+                  {whereYouLeftOff(recall) || recall.recall}
+                </Field>
+
+                {recall.reconstructedWorkState.openQuestion && (
+                  <OpenQuestion
+                    delay={340}
+                    text={recall.reconstructedWorkState.openQuestion}
+                  />
+                )}
+
+                {recall.reconstructedWorkState.nextExperiment && (
+                  <Field label="Resume with" delay={600}>
+                    {recall.reconstructedWorkState.nextExperiment}
+                  </Field>
+                )}
+              </div>
+
+              <div
+                className="reveal-up mt-6"
+                style={{ animationDelay: "820ms" }}
+              >
+                <button
+                  onClick={() => setPhase("resumed")}
+                  className="w-full rounded-full bg-primary py-3 text-[15px] font-semibold text-primary-foreground shadow-soft transition-transform duration-200 hover:scale-[1.02]"
+                >
+                  Resume
+                </button>
               </div>
 
               <div
                 className="reveal-up mt-6 border-t border-border pt-4"
-                style={{ animationDelay: "1300ms" }}
+                style={{ animationDelay: "1000ms" }}
               >
+
                 <p className="text-[12.5px] text-muted-foreground">
                   {recall.retrievedMemories.length} related work memories
                   retrieved from {recall.memoryStore}
