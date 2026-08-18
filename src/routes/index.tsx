@@ -363,7 +363,7 @@ function Index() {
                       onClick={onNewSession}
                       className="w-full rounded-full border border-border bg-secondary py-3 text-[15px] font-semibold text-moss transition-colors hover:bg-accent"
                     >
-                      New session
+                      Leave &amp; come back later
                     </button>
                   </div>
                 )}
