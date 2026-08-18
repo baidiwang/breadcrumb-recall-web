@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-import artwork from "@/assets/night-portrait.jpg";
 import { BreadcrumbCharacter } from "@/components/BreadcrumbCharacter";
+import { CheckoutCanvas } from "@/components/CheckoutCanvas";
 import {
   captureWorkState,
   recallWorkState,
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A quiet creative workspace where Breadcrumb remembers the decision you were still trying to make. Night Portrait study demo.",
+          "A quiet product-design workspace where Breadcrumb remembers the decision you were still trying to make. Mobile Checkout Redesign demo.",
       },
       {
         property: "og:title",
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "A quiet creative workspace where Breadcrumb remembers the decision you were still trying to make. Night Portrait study demo.",
+          "A quiet product-design workspace where Breadcrumb remembers the decision you were still trying to make. Mobile Checkout Redesign demo.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -35,6 +35,7 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
+
 
 /* ---------- small building blocks ---------- */
 
@@ -159,6 +160,18 @@ function Panel({ children }: { children: React.ReactNode }) {
 
 /* ---------- page ---------- */
 
+/** One concise sentence built from the real recalled work state. */
+function whereYouLeftOff(res: RecallResponse): string {
+  const ws = res.reconstructedWorkState;
+  if (!ws.currentDirection) return "";
+  const ruled = ws.rejected.slice(0, 2);
+  const list =
+    ruled.length === 2 ? `${ruled[0]} and ${ruled[1]}` : (ruled[0] ?? "");
+  return list
+    ? `You were testing ${ws.currentDirection} after ruling out ${list}.`
+    : `You were testing ${ws.currentDirection}.`;
+}
+
 type Phase =
   | "working"
   | "noticed"
@@ -167,7 +180,9 @@ type Phase =
   | "transition"
   | "returned"
   | "welcome"
-  | "recalled";
+  | "recalled"
+  | "resumed";
+
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("working");
@@ -214,8 +229,8 @@ function Index() {
       setSession(2);
       setPhase("returned");
       window.scrollTo({ top: 0 });
-    }, 2600);
-    later(() => setPhase("welcome"), 4600);
+    }, 1700);
+    later(() => setPhase("welcome"), 2900);
   };
 
   const onRecall = async () => {
@@ -256,30 +271,22 @@ function Index() {
       <main className="mx-auto max-w-5xl px-8 pb-40 pt-14">
         <div className="max-w-xl">
           <h1 className="font-display text-[44px] font-bold leading-tight tracking-tight text-foreground">
-            Night Portrait
+            Mobile Checkout Redesign
           </h1>
           <p className="mt-3 text-[16px] leading-relaxed text-muted-foreground">
             {session === 1
-              ? "Palette study · last edited 14 minutes ago"
-              : "Night portrait study. Keep the environment cool without losing warm skin tones."}
+              ? "Checkout header · last edited 14 minutes ago"
+              : "Continue simplifying the mobile checkout header while keeping progress clear."}
           </p>
         </div>
 
         <div className="mt-10 flex justify-center">
-          <figure className="w-full max-w-[520px] rounded-[32px] bg-card p-3 shadow-soft">
-            <img
-              src={artwork}
-              alt="Night Portrait study: a warmly lit face against a cool blue-violet night city"
-              width={1280}
-              height={1600}
-              className="w-full rounded-[24px] object-cover"
-            />
-            <figcaption className="px-2 pb-1 pt-3 text-[13px] text-muted-foreground">
-              night-portrait_v7.psd
-            </figcaption>
-          </figure>
+          <div className="w-full max-w-[720px]">
+            <CheckoutCanvas />
+          </div>
         </div>
       </main>
+
 
       {/* time-passing transition */}
       {phase === "transition" && (
@@ -297,9 +304,20 @@ function Index() {
       <div className="pointer-events-none fixed bottom-6 right-6 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end gap-3">
         {phase === "noticed" && (
           <div className="pointer-events-auto">
-            <Bubble>I noticed you stopped working on this piece.</Bubble>
+            <Bubble>I noticed you stopped working here.</Bubble>
           </div>
         )}
+
+        {phase === "resumed" && (
+          <div className="pointer-events-auto">
+            <Bubble>
+              <span className="text-moss">
+                Picking up right where you left off.
+              </span>
+            </Bubble>
+          </div>
+        )}
+
 
         {phase === "welcome" && (
           <div className="pointer-events-auto flex flex-col items-end gap-3">
@@ -332,8 +350,8 @@ function Index() {
             <Panel>
               <p className="text-[15px] leading-snug text-muted-foreground">
                 {captured
-                  ? "I noticed you stopped working on this piece. Here's where you were."
-                  : "I noticed you stopped working on this piece. Want me to remember where you are?"}
+                  ? "I noticed you stopped working here. Here's where you were."
+                  : "I noticed you stopped working here. Want me to remember where you are?"}
               </p>
               {captured && (
                 <div className="mt-5">
@@ -370,7 +388,7 @@ function Index() {
                       onClick={onNewSession}
                       className="w-full rounded-full border border-border bg-secondary py-3 text-[15px] font-semibold text-moss transition-colors hover:bg-accent"
                     >
-                      New session
+                      Leave &amp; come back later
                     </button>
                   </div>
                 )}
@@ -382,17 +400,46 @@ function Index() {
         {showRecallPanel && (
           <div className="pointer-events-auto">
             <Panel>
-              <p className="font-display text-[17px] font-semibold leading-snug text-moss">
-                {recall.recall}
+              <p className="font-display text-[19px] font-semibold leading-snug text-moss">
+                Welcome back.
               </p>
-              <div className="mt-5">
-                <WorkStateBody state={recall.reconstructedWorkState} base={80} />
+
+              <div className="mt-5 space-y-5">
+                <Field label="Where you left off" delay={80}>
+                  {whereYouLeftOff(recall) || recall.recall}
+                </Field>
+
+                {recall.reconstructedWorkState.openQuestion && (
+                  <OpenQuestion
+                    delay={340}
+                    text={recall.reconstructedWorkState.openQuestion}
+                  />
+                )}
+
+                {recall.reconstructedWorkState.nextExperiment && (
+                  <Field label="Resume with" delay={600}>
+                    {recall.reconstructedWorkState.nextExperiment}
+                  </Field>
+                )}
+              </div>
+
+              <div
+                className="reveal-up mt-6"
+                style={{ animationDelay: "820ms" }}
+              >
+                <button
+                  onClick={() => setPhase("resumed")}
+                  className="w-full rounded-full bg-primary py-3 text-[15px] font-semibold text-primary-foreground shadow-soft transition-transform duration-200 hover:scale-[1.02]"
+                >
+                  Resume
+                </button>
               </div>
 
               <div
                 className="reveal-up mt-6 border-t border-border pt-4"
-                style={{ animationDelay: "1300ms" }}
+                style={{ animationDelay: "1000ms" }}
               >
+
                 <p className="text-[12.5px] text-muted-foreground">
                   {recall.retrievedMemories.length} related work memories
                   retrieved from {recall.memoryStore}

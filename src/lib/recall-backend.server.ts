@@ -20,16 +20,18 @@ const BACKEND_URL =
 const PROJECT_ID = "night-portrait";
 const MEMORY_STORE = "CockroachDB";
 
-/** Full session-1 context the artist was working in (sent on capture). */
+/** Full session-1 context the designer was working in (sent on capture). */
 const CAPTURE_CONTEXT =
-  "Night Portrait palette study. I want the character to feel warm and inviting against a cool nighttime environment. " +
-  "I tried a warm yellow background but it competed with the subject. I tried a deep blue background but it made the skin tones feel muddy. " +
-  "Right now I am leaning toward a muted blue-violet. I still cannot decide how to keep the environment cool without making the skin feel muddy. " +
-  "Next I want to reduce background saturation while preserving warm highlights.";
+  "Mobile Checkout Redesign. I am simplifying the checkout header while trying to preserve progress awareness. " +
+  "I tried circular step indicators but they added visual clutter to the header. I tried text-only progress but it was too easy to miss. " +
+  "Right now I am leaning toward a thin progress bar with a compact 'Step 2 of 3' label. " +
+  "I still cannot decide how to preserve progress awareness without adding visual clutter. " +
+  "Next I want to test the thin progress bar with the compact step label at the smallest mobile breakpoint.";
 
 /** Session-2 partial context only — no history, no rejected directions. */
 const RECALL_CONTEXT =
-  "Night portrait study. Keep the environment cool without losing warm skin tones.";
+  "Continue simplifying the mobile checkout header while keeping progress clear.";
+
 
 type RawWorkState = {
   intent?: string;
