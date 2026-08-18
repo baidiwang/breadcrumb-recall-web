@@ -36,7 +36,6 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-
 /* ---------- small building blocks ---------- */
 
 function Field({
@@ -53,9 +52,7 @@ function Field({
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </p>
-      <div className="mt-1.5 text-[15px] leading-relaxed text-foreground">
-        {children}
-      </div>
+      <div className="mt-1.5 text-[15px] leading-relaxed text-foreground">{children}</div>
     </div>
   );
 }
@@ -76,13 +73,7 @@ function OpenQuestion({ delay, text }: { delay: number; text: string }) {
   );
 }
 
-function WorkStateBody({
-  state,
-  base = 0,
-}: {
-  state: WorkState;
-  base?: number;
-}) {
+function WorkStateBody({ state, base = 0 }: { state: WorkState; base?: number }) {
   return (
     <div className="space-y-5">
       {state.intent && (
@@ -92,33 +83,30 @@ function WorkStateBody({
       )}
 
       {state.explored.length > 0 && (
-      <Field label="Explored" delay={base + 220}>
-        <div className="flex flex-wrap gap-2">
-          {state.explored.map((e) => (
-            <span
-              key={e}
-              className="rounded-full bg-secondary px-3 py-1 text-[13px] text-moss"
-            >
-              {e}
-            </span>
-          ))}
-        </div>
-      </Field>
+        <Field label="Explored" delay={base + 220}>
+          <div className="flex flex-wrap gap-2">
+            {state.explored.map((e) => (
+              <span key={e} className="rounded-full bg-secondary px-3 py-1 text-[13px] text-moss">
+                {e}
+              </span>
+            ))}
+          </div>
+        </Field>
       )}
 
       {state.rejected.length > 0 && (
-      <Field label="Rejected" delay={base + 440}>
-        <ul className="space-y-1.5">
-          {state.rejected.map((r) => (
-            <li key={r} className="flex gap-2">
-              <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/60" />
-              <span className="text-muted-foreground line-through decoration-muted-foreground/40">
-                {r}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </Field>
+        <Field label="Rejected" delay={base + 440}>
+          <ul className="space-y-1.5">
+            {state.rejected.map((r) => (
+              <li key={r} className="flex gap-2">
+                <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/60" />
+                <span className="text-muted-foreground line-through decoration-muted-foreground/40">
+                  {r}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Field>
       )}
 
       {state.currentDirection && (
@@ -129,9 +117,7 @@ function WorkStateBody({
         </Field>
       )}
 
-      {state.openQuestion && (
-        <OpenQuestion delay={base + 880} text={state.openQuestion} />
-      )}
+      {state.openQuestion && <OpenQuestion delay={base + 880} text={state.openQuestion} />}
 
       {state.nextExperiment && (
         <Field label="Next experiment" delay={base + 1100}>
@@ -165,8 +151,7 @@ function whereYouLeftOff(res: RecallResponse): string {
   const ws = res.reconstructedWorkState;
   if (!ws.currentDirection) return "";
   const ruled = ws.rejected.slice(0, 2);
-  const list =
-    ruled.length === 2 ? `${ruled[0]} and ${ruled[1]}` : (ruled[0] ?? "");
+  const list = ruled.length === 2 ? `${ruled[0]} and ${ruled[1]}` : (ruled[0] ?? "");
   return list
     ? `You were testing ${ws.currentDirection} after ruling out ${list}.`
     : `You were testing ${ws.currentDirection}.`;
@@ -182,7 +167,6 @@ type Phase =
   | "welcome"
   | "recalled"
   | "resumed";
-
 
 function Index() {
   const [phase, setPhase] = useState<Phase>("working");
@@ -287,7 +271,6 @@ function Index() {
         </div>
       </main>
 
-
       {/* time-passing transition */}
       {phase === "transition" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm">
@@ -311,13 +294,10 @@ function Index() {
         {phase === "resumed" && (
           <div className="pointer-events-auto">
             <Bubble>
-              <span className="text-moss">
-                Picking up right where you left off.
-              </span>
+              <span className="text-moss">Picking up right where you left off.</span>
             </Bubble>
           </div>
         )}
-
 
         {phase === "welcome" && (
           <div className="pointer-events-auto flex flex-col items-end gap-3">
@@ -336,11 +316,7 @@ function Index() {
               disabled={recalling}
               className="rounded-full bg-primary px-5 py-2.5 text-[14px] font-semibold text-primary-foreground shadow-soft transition-transform duration-200 hover:scale-[1.03] disabled:opacity-70"
             >
-              {recalling
-                ? "Retrieving…"
-                : recallError
-                  ? "Try again"
-                  : "Show me"}
+              {recalling ? "Retrieving…" : recallError ? "Try again" : "Show me"}
             </button>
           </div>
         )}
@@ -374,9 +350,7 @@ function Index() {
                           : "Remember this"}
                     </button>
                     {captureError && (
-                      <p className="text-center text-[13px] text-clay">
-                        {captureError}
-                      </p>
+                      <p className="text-center text-[13px] text-clay">{captureError}</p>
                     )}
                   </div>
                 ) : (
@@ -410,10 +384,7 @@ function Index() {
                 </Field>
 
                 {recall.reconstructedWorkState.openQuestion && (
-                  <OpenQuestion
-                    delay={340}
-                    text={recall.reconstructedWorkState.openQuestion}
-                  />
+                  <OpenQuestion delay={340} text={recall.reconstructedWorkState.openQuestion} />
                 )}
 
                 {recall.reconstructedWorkState.nextExperiment && (
@@ -423,10 +394,7 @@ function Index() {
                 )}
               </div>
 
-              <div
-                className="reveal-up mt-6"
-                style={{ animationDelay: "820ms" }}
-              >
+              <div className="reveal-up mt-6" style={{ animationDelay: "820ms" }}>
                 <button
                   onClick={() => setPhase("resumed")}
                   className="w-full rounded-full bg-primary py-3 text-[15px] font-semibold text-primary-foreground shadow-soft transition-transform duration-200 hover:scale-[1.02]"
@@ -439,10 +407,9 @@ function Index() {
                 className="reveal-up mt-6 border-t border-border pt-4"
                 style={{ animationDelay: "1000ms" }}
               >
-
                 <p className="text-[12.5px] text-muted-foreground">
-                  {recall.retrievedMemories.length} related work memories
-                  retrieved from {recall.memoryStore}
+                  {recall.retrievedMemories.length} related work memories retrieved from{" "}
+                  {recall.memoryStore}
                 </p>
                 <button
                   onClick={() => setWhyOpen((o) => !o)}
@@ -459,10 +426,7 @@ function Index() {
                 {whyOpen && (
                   <ul className="reveal-up mt-3 space-y-3">
                     {recall.retrievedMemories.map((m) => (
-                      <li
-                        key={m.memoryId}
-                        className="rounded-2xl bg-secondary/70 px-4 py-3"
-                      >
+                      <li key={m.memoryId} className="rounded-2xl bg-secondary/70 px-4 py-3">
                         <div className="flex items-baseline justify-between gap-3">
                           <span className="text-[13.5px] font-semibold text-foreground">
                             Memory {m.memoryId.slice(0, 8)}
