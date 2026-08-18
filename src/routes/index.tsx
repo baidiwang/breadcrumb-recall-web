@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-import artwork from "@/assets/night-portrait.jpg";
 import { BreadcrumbCharacter } from "@/components/BreadcrumbCharacter";
+import { CheckoutCanvas } from "@/components/CheckoutCanvas";
 import {
   captureWorkState,
   recallWorkState,
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A quiet creative workspace where Breadcrumb remembers the decision you were still trying to make. Night Portrait study demo.",
+          "A quiet product-design workspace where Breadcrumb remembers the decision you were still trying to make. Mobile Checkout Redesign demo.",
       },
       {
         property: "og:title",
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "A quiet creative workspace where Breadcrumb remembers the decision you were still trying to make. Night Portrait study demo.",
+          "A quiet product-design workspace where Breadcrumb remembers the decision you were still trying to make. Mobile Checkout Redesign demo.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -35,6 +35,7 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
+
 
 /* ---------- small building blocks ---------- */
 
